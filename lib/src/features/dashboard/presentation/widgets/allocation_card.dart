@@ -4,6 +4,7 @@ import '../../../../constants/constants.dart';
 import '../../../../utils/utils.dart';
 import '../../../settings/application/settings_service.dart';
 import '../../../budgets/domain/budget.dart';
+import '../../../transactions/transactions.dart';
 
 class AllocationCard extends ConsumerWidget {
   final BudgetWithSpending allocation;
