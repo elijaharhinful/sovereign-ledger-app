@@ -6,7 +6,7 @@ class PortfolioCard extends StatelessWidget {
   final double balance;
   final String currencyCode;
   final String currencySymbol;
-  final VoidCallback? onDeposit;
+  final VoidCallback? onExpense;
   final VoidCallback? onWithdraw;
 
   const PortfolioCard({
@@ -14,18 +14,17 @@ class PortfolioCard extends StatelessWidget {
     required this.balance,
     required this.currencyCode,
     required this.currencySymbol,
-    this.onDeposit,
+    this.onExpense,
     this.onWithdraw,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.paddingL),
+      padding: const EdgeInsets.all(AppSizes.paddingM),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primaryDark, AppColors.primary],
+          colors: [Color(0xFF0949A4), Color(0xFF013380)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -34,62 +33,21 @@ class PortfolioCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'LIQUID WEALTH PORTFOLIO',
-                style: AppTextStyles.label.copyWith(color: Colors.white70),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.forest.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  '+12.5%',
-                  style: TextStyle(
-                    color: AppColors.mint,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
           Text(
-            CurrencyFormatter.format(balance,
-                currencyCode: currencyCode, symbol: currencySymbol),
-            style: const TextStyle(
-              color: AppColors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -1,
-            ),
+            'Total Portfolio Balance',
+            style: AppTextStyles.caption.copyWith(color: Colors.white60),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
-            'Market valuation as of today',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white54,
-              fontStyle: FontStyle.italic,
-            ),
+            CurrencyFormatter.format(balance, currencyCode: currencyCode),
+            style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w700, color: AppColors.white, letterSpacing: -1),
           ),
-          const SizedBox(height: AppSizes.paddingL),
+          const SizedBox(height: AppSizes.paddingM),
           Row(
             children: [
-              Expanded(
-                child:
-                    _ActionButton(label: 'DEPOSIT', onTap: onDeposit ?? () {}),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                    label: 'WITHDRAW', onTap: onWithdraw ?? () {}),
-              ),
+              _ActionPill(label: 'EXPENSE', onTap: onExpense),
+              const SizedBox(width: 10),
+              _ActionPill(label: 'WITHDRAW', onTap: onWithdraw, filled: false),
             ],
           ),
         ],
@@ -98,34 +56,35 @@ class PortfolioCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class _ActionPill extends StatelessWidget {
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool filled;
 
-  const _ActionButton({required this.label, required this.onTap});
+  const _ActionPill({required this.label, this.onTap, this.filled = true});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+          color: filled ? AppColors.white : Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+          border: filled ? null : Border.all(color: Colors.white30),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-              letterSpacing: 1.0,
-            ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: filled ? AppColors.primaryDark : AppColors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+            letterSpacing: 0.5,
           ),
         ),
       ),
     );
   }
 }
+

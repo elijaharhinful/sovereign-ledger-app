@@ -15,435 +15,142 @@ class LivenessScreen extends ConsumerWidget {
 
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       if (next.isVerified) {
-        context.go(AppRoutes.dashboard);
+        context.go(AppRoutes.verificationSuccess);
       }
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF0F4FF),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.paddingM),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusMedium),
-                      ),
-                      child: const Icon(Icons.arrow_back,
-                          size: 20, color: AppColors.primaryDark),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text('Settings & Profile',
-                      style: AppTextStyles.heading3
-                          .copyWith(color: AppColors.primary)),
-                ],
-              ),
-              const SizedBox(height: AppSizes.paddingL),
-              Text('SECURITY VERIFICATION', style: AppTextStyles.label),
-              const SizedBox(height: AppSizes.paddingS),
-              Text('Biometric Liveness\nVerification',
-                  style: AppTextStyles.heading1),
-              const SizedBox(height: AppSizes.paddingM),
-              Text(
-                'Please position your face within the frame. We need to verify that you are the account holder.',
-                style:
-                    AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSizes.paddingL),
-
-              // Camera Frame
               Container(
-                width: double.infinity,
-                height: 260,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+                  color: AppColors.periwinkle.withValues(alpha: 0.3),
+                  shape: BoxShape.circle,
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Scanning lines indicator
-                    Positioned(
-                      top: 16,
-                      left: 16,
-                      right: 16,
-                      child: Row(
-                        children: [
-                          _ScanLine(active: authState.isVerifying),
-                          const SizedBox(width: 6),
-                          _ScanLine(active: authState.isVerifying, delay: true),
-                          const SizedBox(width: 6),
-                          _ScanLine(active: false),
-                        ],
-                      ),
-                    ),
-                    if (authState.isVerifying)
-                      const CircularProgressIndicator(
-                        color: AppColors.mint,
-                        strokeWidth: 3,
-                      )
-                    else if (authState.isVerified)
-                      const Icon(Icons.check_circle,
-                          color: AppColors.mint, size: 64)
-                    else if (authState.hasFailed)
-                      const Icon(Icons.cancel,
-                          color: AppColors.danger, size: 64)
-                    else
-                      Icon(Icons.face,
-                          color: Colors.white.withValues(alpha: 0.5), size: 64),
-
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(AppSizes.radiusLarge),
-                            bottomRight: Radius.circular(AppSizes.radiusLarge),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              authState.isVerifying
-                                  ? 'Verifying...'
-                                  : authState.isVerified
-                                      ? 'Verified!'
-                                      : authState.hasFailed
-                                          ? 'Please try again'
-                                          : 'Please blink twice',
-                              style: const TextStyle(
-                                color: AppColors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              authState.hasFailed
-                                  ? authState.errorMessage ??
-                                      'Verification failed'
-                                  : "IF YOU'RE SAFE",
-                              style: const TextStyle(
-                                color: Colors.white60,
-                                fontSize: 11,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingL),
-
-              // Verification Steps
-              Container(
-                padding: const EdgeInsets.all(AppSizes.paddingM),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Verification Steps',
-                        style: AppTextStyles.heading3
-                            .copyWith(color: AppColors.primary)),
-                    const SizedBox(height: AppSizes.paddingM),
-                    _VerificationStep(
-                      number: 1,
-                      title: 'Position Face',
-                      subtitle:
-                          'Align your head within the square and stay still.',
-                      isCompleted:
-                          authState.isVerifying || authState.isVerified,
-                      isActive: !authState.isVerifying && !authState.isVerified,
-                    ),
-                    const SizedBox(height: AppSizes.paddingM),
-                    _VerificationStep(
-                      number: 2,
-                      title: 'Follow Prompts',
-                      subtitle:
-                          'Blink or smile when requested to verify liveness.',
-                      isCompleted: authState.isVerified,
-                      isActive: authState.isVerifying,
-                    ),
-                    const SizedBox(height: AppSizes.paddingM),
-                    _VerificationStep(
-                      number: 3,
-                      title: 'System Check',
-                      subtitle: 'Encryption and validity cross-reference.',
-                      isCompleted: false,
-                      isActive: false,
-                    ),
-                  ],
-                ),
+                child: const Icon(Icons.face_retouching_natural, size: 30, color: AppColors.primaryDark),
               ),
               const SizedBox(height: AppSizes.paddingM),
-
-              // Tips Card
-              Container(
-                padding: const EdgeInsets.all(AppSizes.paddingM),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusCard),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.wb_sunny_outlined,
-                            size: 18, color: AppColors.textSecondary),
-                        const SizedBox(width: 6),
-                        Text('Tips for Success',
-                            style: AppTextStyles.bodyMedium),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.paddingS),
-                    ...[
-                      'Ensure your face is well-lit from the front.',
-                      'Remove glasses or hats if verification fails.',
-                      'Maintain a neutral background.',
-                    ].map((tip) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('• ',
-                                  style: TextStyle(
-                                      color: AppColors.textSecondary)),
-                              Expanded(
-                                  child: Text(tip,
-                                      style: AppTextStyles.body.copyWith(
-                                          color: AppColors.textSecondary))),
-                            ],
-                          ),
-                        )),
-                  ],
-                ),
+              const Text(
+                'Identity Verification',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary, letterSpacing: -0.5),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSizes.paddingM),
-
-              // Status indicators
-              _StatusIndicator(
-                  label: 'Lighting conditions optimal', isOk: true),
               const SizedBox(height: 8),
-              _StatusIndicator(
-                  label: 'Camera ready', isOk: !authState.hasFailed),
+              Text(
+                'We need to perform a quick liveness check',
+                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSizes.paddingM),
+              _buildInfoPill(authState),
               const SizedBox(height: AppSizes.paddingL),
-
-              // CTA Buttons
+              _buildViewfinder(authState),
+              const SizedBox(height: AppSizes.paddingM),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.surface),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shield_outlined, size: 14, color: AppColors.primaryDark),
+                    const SizedBox(width: 6),
+                    Text('End-to-end encrypted', style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSizes.paddingL),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: authState.isVerifying
                       ? null
-                      : () => ref
-                          .read(authStateProvider.notifier)
-                          .startVerification(),
+                      : () => ref.read(authStateProvider.notifier).startVerification(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryDark,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXL)),
                   ),
-                  child: Text(
-                    authState.hasFailed
-                        ? 'Retry Verification'
-                        : 'Begin Verification',
-                    style: const TextStyle(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        authState.isVerifying ? 'Verifying...' : authState.hasFailed ? 'Retry Verification' : 'Start Verification',
+                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.w600, fontSize: 16),
+                      ),
+                      if (!authState.isVerifying) ...const [
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, color: AppColors.white, size: 18),
+                      ],
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () =>
-                      ref.read(authStateProvider.notifier).bypassForDev(),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: const BorderSide(color: AppColors.slateBlue),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancel Verification',
-                    style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingL),
-              Center(
-                child: Text(
-                  'PROTECTED BY SOVEREIGN LEDGER ENCRYPTION V4.2',
-                  style:
-                      AppTextStyles.label.copyWith(color: AppColors.slateBlue),
-                  textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: AppSizes.paddingM),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ScanLine extends StatelessWidget {
-  final bool active;
-  final bool delay;
-
-  const _ScanLine({required this.active, this.delay = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 3,
-        decoration: BoxDecoration(
-          color: active
-              ? (delay ? AppColors.slateBlue : AppColors.mint)
-              : Colors.white24,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
-  }
-}
-
-class _VerificationStep extends StatelessWidget {
-  final int number;
-  final String title;
-  final String subtitle;
-  final bool isCompleted;
-  final bool isActive;
-
-  const _VerificationStep({
-    required this.number,
-    required this.title,
-    required this.subtitle,
-    required this.isCompleted,
-    required this.isActive,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: isCompleted
-                ? AppColors.forest
-                : isActive
-                    ? AppColors.primaryDark
-                    : AppColors.surface,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: isCompleted
-                ? const Icon(Icons.check, color: AppColors.white, size: 14)
-                : Text(
-                    '$number',
-                    style: TextStyle(
-                      color: isActive ? AppColors.white : AppColors.slateBlue,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: isActive || isCompleted
-                      ? AppColors.textPrimary
-                      : AppColors.slateBlue,
+              GestureDetector(
+                onTap: () => ref.read(authStateProvider.notifier).bypassForDev(),
+                child: Text(
+                  'Cancel',
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
                 ),
               ),
-              Text(subtitle, style: AppTextStyles.caption),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
-}
 
-class _StatusIndicator extends StatelessWidget {
-  final String label;
-  final bool isOk;
-
-  const _StatusIndicator({required this.label, required this.isOk});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildInfoPill(AuthState state) {
+    final isError = state.hasFailed;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color:
-                isOk ? AppColors.mint : AppColors.danger.withValues(alpha: 0.5),
-            width: 3,
-          ),
-        ),
-        color: isOk ? AppColors.mintLight : AppColors.overLimitBg,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(8),
-          bottomRight: Radius.circular(8),
-        ),
+        color: isError ? AppColors.overLimitBg : AppColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isError ? AppColors.danger.withValues(alpha: 0.3) : AppColors.surface),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isOk ? Icons.check_circle : Icons.warning_amber,
-            color: isOk ? AppColors.forest : AppColors.danger,
-            size: 18,
+            isError ? Icons.warning_amber_outlined : Icons.info_outline,
+            size: 14,
+            color: isError ? AppColors.danger : AppColors.textSecondary,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Text(
-            label,
-            style: AppTextStyles.body.copyWith(
-              color: isOk ? AppColors.forest : AppColors.danger,
-              fontWeight: FontWeight.w500,
-            ),
+            isError ? (state.errorMessage ?? 'Verification failed. Try again.') : 'Center your face in the frame',
+            style: AppTextStyles.caption.copyWith(color: isError ? AppColors.danger : AppColors.textPrimary),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildViewfinder(AuthState state) {
+    return Container(
+      width: 280,
+      height: 280,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.primaryDark, width: 4),
+        color: const Color(0xFFDDE8FF),
+      ),
+      child: Center(
+        child: state.isVerifying
+            ? const CircularProgressIndicator(color: AppColors.primaryDark, strokeWidth: 3)
+            : const Icon(Icons.videocam_outlined, size: 56, color: AppColors.slateBlue),
       ),
     );
   }

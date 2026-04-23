@@ -24,25 +24,26 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingM, vertical: 14),
+                    horizontal: AppSizes.paddingM, vertical: AppSizes.paddingM),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => context.go(AppRoutes.dashboard),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.arrow_back,
-                            size: 20, color: AppColors.primaryDark),
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppColors.primaryDark,
+                      child: Text(
+                        settings.userName.isNotEmpty ? settings.userName[0] : 'A',
+                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.w700),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text('Settings & Profile',
-                        style: AppTextStyles.heading3
-                            .copyWith(color: AppColors.primary)),
+                    const SizedBox(width: 10),
+                    Text('Sovereign Ledger', style: AppTextStyles.heading3),
+                    const Spacer(),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.notifications_outlined, size: 20, color: AppColors.primaryDark),
+                    ),
                   ],
                 ),
               ),
@@ -175,65 +176,10 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                     _SettingsTile(
-                        icon: Icons.pin_outlined,
-                        title: 'Security PIN',
-                        subtitle: 'Last updated 12 days ago',
-                        onTap: () => context.push(AppRoutes.liveness)),
-                    _SettingsTile(
                         icon: Icons.lock_outline,
                         title: 'User Password',
                         subtitle: 'Last updated 5 days ago',
-                        onTap: () {}),
-                    _SettingsTile(
-                        icon: Icons.security,
-                        title: 'Two-Factor Authentication',
-                        subtitle: 'Last updated 1 month ago',
-                        onTap: () {}),
-                    const SizedBox(height: AppSizes.paddingM),
-
-                    // Data Management
-                    _SectionLabel(label: 'DATA MANAGEMENT'),
-                    _SettingsTile(
-                      icon: Icons.upload_file,
-                      title: 'Export Data',
-                      subtitle: 'CSV, PDF, or JSON',
-                      onTap: () async {
-                        try {
-                          final path =
-                              await ref.read(exportServiceProvider).exportCsv();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Exported to: $path'),
-                                  backgroundColor: AppColors.forest),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Export failed: $e'),
-                                  backgroundColor: AppColors.danger),
-                            );
-                          }
-                        }
-                      },
-                    ),
-                    _SettingsTile(
-                        icon: Icons.cloud_upload_outlined,
-                        title: 'Cloud Backup',
-                        subtitle: 'Auto-sync enabled',
-                        onTap: () {}),
-                    _SettingsTile(
-                        icon: Icons.analytics_outlined,
-                        title: 'User Analytics',
-                        subtitle: 'Real-time insights available',
-                        onTap: () {}),
-                    _SettingsTile(
-                        icon: Icons.description_outlined,
-                        title: 'Custom Reports',
-                        subtitle: 'Schedule and automate generation',
-                        onTap: () {}),
+                        onTap: () => context.push(AppRoutes.changePassword)),
                     const SizedBox(height: AppSizes.paddingM),
 
                     // Preferences
@@ -250,19 +196,9 @@ class SettingsScreen extends ConsumerWidget {
                         subtitle: settings.language,
                         onTap: () {}),
                     _SettingsTile(
-                        icon: Icons.access_time,
-                        title: 'Timezone',
-                        subtitle: 'UTC -5',
-                        onTap: () {}),
-                    _SettingsTile(
                         icon: Icons.help_outline,
                         title: 'Help Center',
                         subtitle: 'FAQs and direct support',
-                        onTap: () {}),
-                    _SettingsTile(
-                        icon: Icons.payment,
-                        title: 'Payment Method',
-                        subtitle: 'Credit Card',
                         onTap: () {}),
                     const SizedBox(height: AppSizes.paddingL),
 

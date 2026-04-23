@@ -571,6 +571,13 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       body:
                           "Your 'Lifestyle' allocation is exceeding targets. Shift \$200 to your index fund.",
                     ),
+                    const SizedBox(height: AppSizes.paddingM),
+
+                    // Smart Forecast & Prediction
+                    const _SmartForecastCard(),
+                    const SizedBox(height: AppSizes.paddingM),
+                    const _SmartPredictionCard(),
+
                     const SizedBox(height: 80),
                   ],
                 ),
@@ -680,6 +687,86 @@ class _SuggestionCard extends StatelessWidget {
                         .copyWith(color: AppColors.primary, fontSize: 13)),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmartForecastCard extends StatelessWidget {
+  const _SmartForecastCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingL),
+      decoration: BoxDecoration(
+        color: AppColors.primaryDark,
+        borderRadius: BorderRadius.circular(AppSizes.radiusXL),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.mint, size: 20),
+              const SizedBox(width: 8),
+              const Text('Smart Forecast', style: TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              Text('Based on last 3 months', style: AppTextStyles.caption.copyWith(color: Colors.white60)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Allocating \$1,200 for Food is 12% lower than your average trend. You\'re saving more this month!',
+            style: TextStyle(color: AppColors.white, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.mint.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text('Good Financial Health', style: TextStyle(color: AppColors.mint, fontSize: 11, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmartPredictionCard extends StatelessWidget {
+  const _SmartPredictionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingL),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6EFFF),
+        borderRadius: BorderRadius.circular(AppSizes.radiusXL),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Estimated Month-End', style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                const Text('\$5,910.00', style: TextStyle(color: AppColors.primaryDark, fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -1)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text('↘ 12% LOWER THAN LAST MONTH', style: TextStyle(color: AppColors.forest, fontSize: 9, fontWeight: FontWeight.w700)),
           ),
         ],
       ),

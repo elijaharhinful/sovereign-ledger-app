@@ -20,11 +20,9 @@ class TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.type == TransactionType.income;
-    final amountColor = isIncome ? AppColors.forest : AppColors.danger;
-    final amountPrefix = isIncome ? '+' : '-';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 2),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -54,14 +52,14 @@ class TransactionTile extends StatelessWidget {
               children: [
                 Text(
                   transaction.note ?? transaction.category.label,
-                  style: AppTextStyles.bodyMedium,
+                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
-                  '${transaction.category.label.toUpperCase()} • ${DateFormatter.time(transaction.date)}',
-                  style: AppTextStyles.caption,
+                  '${transaction.category.sectorLabel} • ${DateFormatter.time(transaction.date)}',
+                  style: AppTextStyles.caption.copyWith(fontSize: 10),
                 ),
               ],
             ),
@@ -70,16 +68,16 @@ class TransactionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '$amountPrefix${CurrencyFormatter.format(transaction.amount, currencyCode: currencyCode)}',
+                '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount, currencyCode: currencyCode)}',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: amountColor,
+                  color: isIncome ? AppColors.forest : AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 DateFormatter.shortDate(transaction.date).toUpperCase(),
-                style: AppTextStyles.caption,
+                style: AppTextStyles.caption.copyWith(fontSize: 10),
               ),
             ],
           ),

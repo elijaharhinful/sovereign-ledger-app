@@ -45,4 +45,19 @@ extension TransactionCategoryX on TransactionCategory {
         TransactionCategory.investment => Icons.show_chart,
         TransactionCategory.groceries => Icons.shopping_cart,
       };
+
+  String get sectorLabel => switch (this) {
+        TransactionCategory.food => 'FOOD & DINING',
+        TransactionCategory.travel => 'TRAVEL',
+        TransactionCategory.salary => 'INCOME',
+        TransactionCategory.shop => 'SUBSCRIPTION',
+        TransactionCategory.home => 'HOME',
+        TransactionCategory.other => 'OTHER',
+        TransactionCategory.transport => 'TRANSPORT',
+        TransactionCategory.entertainment => 'SUBSCRIPTION',
+        TransactionCategory.health => 'HEALTH',
+        TransactionCategory.utilities => 'UTILITIES',
+        TransactionCategory.investment => 'INVESTMENT',
+        TransactionCategory.groceries => 'GROCERIES',
+      };
 }

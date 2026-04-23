@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../constants/constants.dart';
 import '../../../common_widgets/common_widgets.dart';
-import '../../../utils/utils.dart';
 import '../application/budgets_service.dart';
 import '../../transactions/domain/transaction_category.dart';
 
@@ -16,20 +15,18 @@ class AddBudgetScreen extends ConsumerStatefulWidget {
 
 class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   TransactionCategory _category = TransactionCategory.food;
-  final _limitController = TextEditingController();
-  DateTime _startDate = DateTime.now();
-  DateTime _endDate =
-      DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
+  final _notesController = TextEditingController();
+  String _limitAmount = '0';
   bool _isSaving = false;
 
   @override
   void dispose() {
-    _limitController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
-    final limit = double.tryParse(_limitController.text.replaceAll(',', ''));
+    final limit = double.tryParse(_limitAmount);
     if (limit == null || limit <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid budget limit')),
@@ -38,20 +35,74 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     }
 
     setState(() => _isSaving = true);
+    final now = DateTime.now();
     await ref.read(budgetsProvider.notifier).addBudget(
           category: _category,
           limit: limit,
-          startDate: _startDate,
-          endDate: _endDate,
+          startDate: DateTime(now.year, now.month, 1),
+          endDate: DateTime(now.year, now.month + 1, 0, 23, 59, 59),
         );
     setState(() => _isSaving = false);
     if (mounted) context.pop();
   }
 
+  void _showCategoryPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXL)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSizes.paddingL),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Select Category', style: AppTextStyles.heading3),
+            const SizedBox(height: AppSizes.paddingL),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 4,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: TransactionCategory.values.map((cat) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() => _category = cat);
+                    Navigator.pop(ctx);
+                  },
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(cat.icon, color: AppColors.primaryDark),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(cat.label,
+                          style: AppTextStyles.caption.copyWith(fontSize: 10),
+                          overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -66,191 +117,149 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(12)),
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: const Icon(Icons.arrow_back,
                           size: 20, color: AppColors.primaryDark),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text('Add Budget', style: AppTextStyles.heading3),
+                  Text('New Category', style: AppTextStyles.heading3),
                 ],
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSizes.paddingM),
+                padding: const EdgeInsets.all(AppSizes.paddingL),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('SELECT CATEGORY', style: AppTextStyles.label),
-                    const SizedBox(height: AppSizes.paddingM),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 3,
-                      childAspectRatio: 1.1,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      children: TransactionCategory.values.map((cat) {
-                        final isSelected = _category == cat;
-                        return GestureDetector(
-                          onTap: () => setState(() => _category = cat),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primaryDark
-                                      .withValues(alpha: 0.08)
-                                  : AppColors.white,
-                              borderRadius:
-                                  BorderRadius.circular(AppSizes.radiusMedium),
-                              border: isSelected
-                                  ? Border.all(
-                                      color: AppColors.primaryDark, width: 2)
-                                  : null,
+                    Text('CATEGORY NAME', style: AppTextStyles.label),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _showCategoryPicker,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius:
+                              BorderRadius.circular(AppSizes.radiusMedium),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(_category.icon,
+                                color: AppColors.primaryDark, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _category.label,
+                                style: AppTextStyles.bodyMedium,
+                              ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(cat.icon,
-                                    size: 22,
-                                    color: isSelected
-                                        ? AppColors.primaryDark
-                                        : AppColors.slateBlue),
-                                const SizedBox(height: 4),
-                                Text(
-                                  cat.label,
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: isSelected
-                                        ? AppColors.primaryDark
-                                        : AppColors.textSecondary,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                            const Icon(Icons.keyboard_arrow_down,
+                                color: AppColors.slateBlue),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: AppSizes.paddingL),
-                    Text('BUDGET LIMIT', style: AppTextStyles.label),
+                    Text('NOTES', style: AppTextStyles.label),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.paddingM, vertical: 4),
+                          horizontal: 16, vertical: 4),
                       decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius:
-                              BorderRadius.circular(AppSizes.radiusCard)),
-                      child: Row(
+                        color: AppColors.background,
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusMedium),
+                      ),
+                      child: TextField(
+                        controller: _notesController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'What was this for?',
+                          hintStyle: AppTextStyles.body
+                              .copyWith(color: AppColors.slateBlue),
+                        ),
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Center(
+                      child: Column(
                         children: [
-                          const Text('\$',
-                              style: TextStyle(
-                                  fontSize: 24,
-                                  color: AppColors.slateBlue,
-                                  fontWeight: FontWeight.w700)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _limitController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              style: AppTextStyles.amountMedium,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '0.00',
-                                hintStyle: AppTextStyles.amountMedium
-                                    .copyWith(color: AppColors.slateBlue),
-                              ),
+                          Text('CATEGORY BUDGET', style: AppTextStyles.label),
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () async {
+                              final val = await showAmountNumpad(context,
+                                  initial: _limitAmount);
+                              if (val != null) {
+                                setState(() => _limitAmount = val);
+                              }
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '\$ $_limitAmount',
+                                  style: AppTextStyles.amountLarge.copyWith(
+                                      fontSize: 48,
+                                      color: AppColors.primaryDark),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryDark
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text('USD',
+                                      style: TextStyle(
+                                          color: AppColors.primaryDark,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 12)),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: AppSizes.paddingL),
-                    Text('TIME PERIOD', style: AppTextStyles.label),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _DateTile(
-                            label: 'Start',
-                            date: _startDate,
-                            onTap: () async {
-                              final d = await showDatePicker(
-                                context: context,
-                                initialDate: _startDate,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
-                              );
-                              if (d != null) setState(() => _startDate = d);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _DateTile(
-                            label: 'End',
-                            date: _endDate,
-                            onTap: () async {
-                              final d = await showDatePicker(
-                                context: context,
-                                initialDate: _endDate,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
-                              );
-                              if (d != null) setState(() => _endDate = d);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSizes.paddingXL),
                   ],
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSizes.paddingM),
-              child: PrimaryButton(
-                  label: 'Add Budget', isLoading: _isSaving, onPressed: _save),
+              padding: const EdgeInsets.all(AppSizes.paddingL),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radiusXL)),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: AppColors.white, strokeWidth: 2))
+                      : const Text('Save Up!',
+                          style: TextStyle(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16)),
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DateTile extends StatelessWidget {
-  final String label;
-  final DateTime date;
-  final VoidCallback onTap;
-
-  const _DateTile(
-      {required this.label, required this.date, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.paddingM),
-        decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppSizes.radiusCard)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label.toUpperCase(), style: AppTextStyles.label),
-            const SizedBox(height: 4),
-            Text(DateFormatter.format(date), style: AppTextStyles.bodyMedium),
           ],
         ),
       ),
